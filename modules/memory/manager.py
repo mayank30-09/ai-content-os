@@ -81,8 +81,12 @@ class MemoryManager:
         """Permanently deletes a memory record by ID."""
         return self.store.delete(record_id)
 
-    def prune_expired_memories(self) -> int:
+    def prune_expired(self) -> int:
         """Prunes all memory records past their expires_at timestamp."""
         return self.store.prune_expired()
+
+    def prune_expired_memories(self) -> int:
+        """Prunes all memory records past their expires_at timestamp."""
+        return self.prune_expired()
 
 memory_manager = MemoryManager()
