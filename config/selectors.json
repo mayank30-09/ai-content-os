@@ -1,0 +1,50 @@
+{
+  "gemini_web": {
+    "prompt_textarea": [
+      "rich-textarea div[contenteditable='true']",
+      "textarea[aria-label='Enter a prompt here']",
+      "div[role='textbox'][contenteditable='true']",
+      ".input-area div[role='textbox']"
+    ],
+    "submit_button": [
+      "button[aria-label='Send message']",
+      "button.send-button",
+      "button:has-text('Send')",
+      "button[data-test-id='send-button']"
+    ],
+    "response_container": [
+      "model-response:last-of-type",
+      ".response-container:last-child",
+      "message-content:last-of-type",
+      ".markdown-main-panel"
+    ],
+    "stop_button": [
+      "button[aria-label='Stop response']",
+      "button:has-text('Stop')"
+    ]
+  },
+  "linkedin_web": {
+    "start_post_button": [
+      "button:has-text('Start a post')",
+      "button.share-box-feed-entry__trigger"
+    ],
+    "post_modal_textarea": [
+      "div.ql-editor[contenteditable='true']",
+      "div[role='textbox'][aria-label*='What do you want to talk about']"
+    ],
+    "publish_button": [
+      "button.share-actions__primary-action",
+      "button:has-text('Post')"
+    ]
+  },
+  "x_twitter_web": {
+    "tweet_textarea": [
+      "div[data-testid='tweetTextarea_0'][contenteditable='true']",
+      "div[role='textbox'][aria-label='Post text']"
+    ],
+    "post_button": [
+      "button[data-testid='tweetButtonInline']",
+      "button[data-testid='tweetButton']"
+    ]
+  }
+}
