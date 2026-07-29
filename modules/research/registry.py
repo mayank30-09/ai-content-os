@@ -1,19 +1,26 @@
-import logging
+"""Research plugin registry module for AI Content OS.
+
+Registers research source plugins and dispatches queries to appropriate scrapers.
+"""
+
+
+from loguru import logger
 
 from modules.research.base import BaseResearchPlugin
 from modules.research.web_plugin import WebResearchPlugin
 
-logger = logging.getLogger("AIContentOS.ResearchRegistry")
 
 class ResearchRegistry:
+    """Registry managing available research plugins and data aggregation."""
+
     def __init__(self):
         self.plugins: list[BaseResearchPlugin] = []
-        # Register default plugins
         self.register(WebResearchPlugin())
 
-    def register(self, plugin: BaseResearchPlugin):
+    def register(self, plugin: BaseResearchPlugin) -> None:
+        """Registers a new research plugin instance."""
         self.plugins.append(plugin)
-        logger.info(f"Registered Research Plugin: {plugin.source_name}")
+        logger.info(f"Registered Research Plugin: '{plugin.source_name}'")
 
     async def gather_research(self, topic_or_urls: list[str]) -> str:
         """Runs appropriate research plugins on inputs and aggregates text summary."""

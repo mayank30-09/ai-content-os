@@ -1,24 +1,36 @@
+"""SQLite async write queue module for AI Content OS.
+
+Prevents database locked errors by wrapping SQLite write operations in an asyncio.Lock
+and executing BEGIN IMMEDIATE transactions.
+"""
+
 import asyncio
-import logging
 import sqlite3
 from collections.abc import Callable
 from typing import Any
 
+from loguru import logger
+
 from config.settings import settings
 
-logger = logging.getLogger("AIContentOS.WriteQueue")
 
 class AsyncWriteQueue:
-    """Centralized asynchronous write queue for SQLite to prevent database locked errors."""
+    """Centralized asynchronous write queue for SQLite to prevent lock contention."""
 
     def __init__(self, db_path: str = str(settings.DB_PATH)):
-        self.db_path = db_path
-        self._lock = asyncio.Lock()
+        self.db_path: str = db_path
+        self._lock: asyncio.Lock = asyncio.Lock()
 
     async def execute_write(self, write_func: Callable[[sqlite3.Connection], Any]) -> Any:
-        """Executes write operation inside a thread lock using BEGIN IMMEDIATE transaction."""
+        """Executes write operation inside a thread lock using BEGIN IMMEDIATE transaction.
+
+        Args:
+            write_func: Callable accepting an active sqlite3.Connection.
+
+        Returns:
+            Any: Result of the write_func callback execution.
+        """
         async with self._lock:
-            # Run blocking SQLite write transaction in executor thread
             loop = asyncio.get_event_loop()
             return await loop.run_in_executor(None, self._run_transaction, write_func)
 
@@ -28,7 +40,6 @@ class AsyncWriteQueue:
         try:
             conn.execute("PRAGMA journal_mode=WAL;")
             conn.execute("PRAGMA foreign_keys=ON;")
-            # Immediate transaction locks the DB for writing upfront
             conn.execute("BEGIN IMMEDIATE;")
             result = write_func(conn)
             conn.commit()

@@ -44,6 +44,12 @@ class AppConfig(BaseSettings):
     HUMAN_TYPING_MIN_DELAY_MS: int = Field(default=30, description="Min typing delay per char")
     HUMAN_TYPING_MAX_DELAY_MS: int = Field(default=100, description="Max typing delay per char")
 
+    # Gemini Web Resilience Settings
+    GEMINI_MAX_RETRIES: int = Field(default=3, description="Maximum retry attempts for Gemini web automation")
+    GEMINI_RETRY_BACKOFF_FACTOR: float = Field(default=2.0, description="Exponential backoff multiplier for retries")
+    GEMINI_GENERATION_TIMEOUT: int = Field(default=60, description="Max seconds to wait for text output stabilization")
+    GEMINI_MIN_RESPONSE_LENGTH: int = Field(default=20, description="Minimum acceptable character length for AI output")
+
     # Platform Web Application Endpoints
     GEMINI_WEB_URL: str = Field(default="https://gemini.google.com/app")
     LINKEDIN_WEB_URL: str = Field(default="https://www.linkedin.com/feed/")

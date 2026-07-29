@@ -21,6 +21,20 @@
     "stop_button": [
       "button[aria-label='Stop response']",
       "button:has-text('Stop')"
+    ],
+    "loading_indicators": [
+      "button[aria-label='Stop response']",
+      ".loading-indicator",
+      "mat-progress-spinner",
+      ".shimmer-container"
+    ],
+    "popup_dismiss_buttons": [
+      "button:has-text('Got it')",
+      "button:has-text('Dismiss')",
+      "button:has-text('Accept all')",
+      "button:has-text('No thanks')",
+      "button[aria-label='Close']",
+      "button.close-button"
     ]
   },
   "linkedin_web": {

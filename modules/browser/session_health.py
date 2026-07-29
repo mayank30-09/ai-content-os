@@ -1,36 +1,57 @@
-import logging
+"""Session health manager module for AI Content OS.
+
+Verifies authentication health for target web applications (Gemini, LinkedIn, X/Twitter),
+detects expired session states, and manages headed manual login recovery sessions.
+"""
+
 from enum import Enum
+from typing import Any
+
+from loguru import logger
 
 from config.settings import settings
-from modules.browser.pool import browser_pool
-from modules.browser.selector_manager import selector_manager
+from modules.browser.selector_manager import selector_registry
 
-logger = logging.getLogger("AIContentOS.SessionHealth")
 
 class SessionStatus(Enum):
+    """Enumeration of session health states."""
     HEALTHY = "HEALTHY"
     EXPIRED = "EXPIRED"
     DEGRADED = "DEGRADED"
 
 class SessionHealthManager:
+    """Verifies session cookies/profiles and triggers manual login recovery if expired."""
+
     def __init__(self):
-        self.platform_status: dict[str, SessionStatus] = {
+        self._statuses: dict[str, SessionStatus] = {
             "gemini_web": SessionStatus.EXPIRED,
             "linkedin": SessionStatus.EXPIRED,
-            "x_twitter": SessionStatus.EXPIRED
+            "x_twitter": SessionStatus.EXPIRED,
         }
 
-    async def verify_session(self, platform: str) -> SessionStatus:
-        """Verifies session health for a given platform."""
-        logger.info(f"Verifying session health for platform: {platform}")
-        page = await browser_pool.new_page()
+    def get_status(self, platform: str) -> SessionStatus:
+        """Returns current cached status for a platform."""
+        return self._statuses.get(platform, SessionStatus.EXPIRED)
+
+    async def verify_session(self, page: Any, platform: str) -> SessionStatus:
+        """Verifies session health for a given platform page.
+
+        Args:
+            page: Active Playwright Page instance.
+            platform: Platform identifier (e.g., 'gemini_web', 'linkedin', 'x_twitter').
+
+        Returns:
+            SessionStatus: HEALTHY if session inputs are accessible, EXPIRED or DEGRADED otherwise.
+        """
+        logger.info(f"Verifying authentication session health for platform: '{platform}'")
         try:
             if platform == "gemini_web":
                 await page.goto(settings.GEMINI_WEB_URL, timeout=20000)
                 try:
-                    elem = await selector_manager.find_element(page, "gemini_web", "prompt_textarea")
+                    elem = await selector_registry.find_element(page, "gemini_web", "prompt_textarea")
                     if elem:
-                        self.platform_status[platform] = SessionStatus.HEALTHY
+                        self._statuses[platform] = SessionStatus.HEALTHY
+                        logger.info(f"Session HEALTHY for platform: '{platform}'")
                         return SessionStatus.HEALTHY
                 except Exception:
                     pass
@@ -38,46 +59,55 @@ class SessionHealthManager:
             elif platform == "linkedin":
                 await page.goto(settings.LINKEDIN_WEB_URL, timeout=20000)
                 try:
-                    elem = await selector_manager.find_element(page, "linkedin_web", "start_post_button")
+                    elem = await selector_registry.find_element(page, "linkedin_web", "start_post_button")
                     if elem:
-                        self.platform_status[platform] = SessionStatus.HEALTHY
+                        self._statuses[platform] = SessionStatus.HEALTHY
+                        logger.info(f"Session HEALTHY for platform: '{platform}'")
                         return SessionStatus.HEALTHY
                 except Exception:
                     pass
 
-            self.platform_status[platform] = SessionStatus.EXPIRED
-            logger.warning(f"Session EXPIRED for platform: {platform}")
+            self._statuses[platform] = SessionStatus.EXPIRED
+            logger.warning(f"Session EXPIRED for platform: '{platform}'")
             return SessionStatus.EXPIRED
-        except Exception as e:
-            logger.error(f"Error checking session for {platform}: {e}")
-            self.platform_status[platform] = SessionStatus.DEGRADED
-            return SessionStatus.DEGRADED
-        finally:
-            await page.close()
 
-    async def open_headed_login(self, platform: str, timeout_sec: int = 120):
-        """Launches a headed browser instance allowing the user to manually log in and save session state."""
-        logger.info(f"Opening headed browser for manual user login to {platform}...")
+        except Exception as e:
+            logger.error(f"Error during session health check for '{platform}': {e}")
+            self._statuses[platform] = SessionStatus.DEGRADED
+            return SessionStatus.DEGRADED
+
+    async def open_headed_login(self, browser_pool: Any, platform: str, timeout_sec: int = 120) -> bool:
+        """Launches a visible headed browser context allowing user to manually log in.
+
+        Args:
+            browser_pool: BrowserPool instance.
+            platform: Platform identifier to authenticate.
+            timeout_sec: Maximum duration to wait for user login.
+
+        Returns:
+            bool: True if user successfully logged in within timeout.
+        """
+        logger.info(f"Launching headed browser for manual user authentication to '{platform}'...")
         url_map = {
             "gemini_web": settings.GEMINI_WEB_URL,
             "linkedin": settings.LINKEDIN_WEB_URL,
-            "x_twitter": settings.X_TWITTER_WEB_URL
+            "x_twitter": settings.X_TWITTER_WEB_URL,
         }
         target_url = url_map.get(platform, settings.GEMINI_WEB_URL)
+        page = await browser_pool.new_page(headless=False)
 
-        # Launch headed browser context specifically for authentication
-        playwright = await browser_pool.get_context()
-        page = await playwright.new_page()
         try:
             await page.goto(target_url)
-            logger.info(f"Please log into {platform} in the opened browser window. Waiting up to {timeout_sec}s...")
-            # Wait for user manual login
+            logger.info(f"Please complete login in the opened browser window. Polling up to {timeout_sec}s...")
+
             for _ in range(timeout_sec):
-                status = await self.verify_session(platform)
+                status = await self.verify_session(page, platform)
                 if status == SessionStatus.HEALTHY:
-                    logger.info(f"Manual login verified! Session state saved for {platform}.")
+                    logger.info(f"Manual authentication verified! Session saved for '{platform}'.")
                     return True
                 await page.wait_for_timeout(1000)
+
+            logger.warning(f"Manual login timed out for '{platform}' after {timeout_sec}s.")
             return False
         finally:
             await page.close()
