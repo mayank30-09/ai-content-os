@@ -7,19 +7,19 @@ from loguru import logger
 from modules.ai.gemini_web import GeminiWebProvider
 from modules.ai.prompt_templates import prompt_library
 from modules.memory.repositories import content_repo, logger_repo
-from modules.research.registry import research_registry
+from modules.research.manager import research_manager
 
 
 async def task_research(context: dict[str, Any]) -> dict[str, Any]:
     """Executes multi-source research gathering for pipeline context."""
     content_id = context["content_id"]
     topic = context["topic"]
-    sources = context.get("sources", [topic])
 
     logger.info(f"[Task Research] Gathering research for content_id: '{content_id}'")
     logger_repo.log(content_id, "RESEARCH", "INFO", f"Starting research for topic: {topic}")
 
-    research_summary = await research_registry.gather_research(sources)
+    package = await research_manager.conduct_research(topic)
+    research_summary = package.executive_summary
     content_repo.update_research(content_id, research_summary)
 
     context["research_summary"] = research_summary

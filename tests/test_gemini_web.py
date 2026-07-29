@@ -63,11 +63,15 @@ async def test_dismiss_popups(provider):
 async def test_session_expired_handling(provider):
     """Verifies that SessionExpiredException is raised when prompt textarea is missing."""
     mock_page = AsyncMock()
+    mock_btn = AsyncMock()
+    mock_btn.count.return_value = 0
+    mock_btn.is_visible.return_value = False
+    mock_page.locator.return_value.first = mock_btn
 
     with (
         patch("modules.ai.gemini_web.browser_pool.new_page", return_value=mock_page),
         patch("modules.ai.gemini_web.selector_registry.find_element", side_effect=RuntimeError("Element not found")),
-        pytest.raises(SessionExpiredException)
+        pytest.raises(SessionExpiredException),
     ):
         await provider.generate("Test prompt")
 
