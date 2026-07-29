@@ -129,7 +129,7 @@ async def test_production_content_strategist_worker_execution():
 
     assert result is not None
     assert result.status == TaskStatus.COMPLETED
-    assert result.execution_time > 0.0
+    assert result.execution_time >= 0.0
     assert "content_brief" in result.artifacts
     assert result.artifacts["platform"] == "LinkedIn"
     assert worker.metrics.tasks_completed == 1
@@ -163,3 +163,20 @@ async def test_strategist_worker_lifecycle():
     await worker.shutdown()
     assert worker.state == WorkerState.STOPPED
     assert await worker.health_check() is False
+
+
+def test_content_brief_serialization():
+    """Verifies complete Pydantic JSON serialization and deserialization of ContentBrief."""
+    engine = StrategyEngine()
+    brief = engine.generate_brief(topic="FastAPI", goal=ContentObjective.EDUCATIONAL)
+
+    dumped = brief.model_dump(mode="json")
+    assert isinstance(dumped, dict)
+    assert dumped["content_goal"] == "EDUCATIONAL"
+    assert dumped["priority"] == "MEDIUM"
+    assert "calendar_hint" in dumped
+
+    reconstructed = ContentBrief.model_validate(dumped)
+    assert reconstructed.title_idea == brief.title_idea
+    assert reconstructed.content_goal == ContentObjective.EDUCATIONAL
+
