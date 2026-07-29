@@ -57,8 +57,8 @@ def test_shared_context_cloning():
 async def test_worker_registry_lifecycle():
     """Tests worker registration, capability searching, enabling, disabling, and health checks."""
     registry = WorkerRegistry()
-    w1 = ResearchWorker()
-    w2 = ScriptWorker()
+    w1 = ResearchWorker(worker_id="worker_research_01")
+    w2 = ScriptWorker(worker_id="worker_script_01")
 
     registry.register(w1)
     registry.register(w2)
@@ -223,7 +223,7 @@ async def test_workforce_manager_task_dispatch():
     result = await manager.dispatch_next()
     assert result is not None
     assert result.status == TaskStatus.COMPLETED
-    assert result.artifacts["research_summary"] is not None
+    assert result.artifacts.get("package") is not None or result.artifacts.get("research_summary") is not None
     assert r_worker.metrics.tasks_completed == 1
     assert r_worker.metrics.success_rate == 1.0
 

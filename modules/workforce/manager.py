@@ -132,7 +132,13 @@ class WorkforceManager:
                 )
                 return result
             else:
-                raise RuntimeError(result.error or "Worker execution failed")
+                task.status = TaskStatus.FAILED
+                assigned_worker.state = WorkerState.READY
+                if not self.scheduler.schedule_retry(task):
+                    await self._safe_emit_event(
+                        "TaskFailed", assigned_worker.worker_id, {"task_id": task.id, "error": result.error}
+                    )
+                return result
 
         except Exception as e:
             duration = round(time.perf_counter() - start_time, 3)
