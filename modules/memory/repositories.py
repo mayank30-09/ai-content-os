@@ -145,35 +145,38 @@ class ContentRepository:
             conn.commit()
 
 class KnowledgeRepository:
+    """Compatibility adapter forwarding legacy knowledge base calls to MemoryManager."""
+
     def add(self, title: str, source_type: str, url: str, content_body: str, tags: str = "") -> str:
-        kb_id = str(uuid.uuid4())
-        with db_client.get_connection() as conn:
-            conn.execute(
-                """
-                INSERT INTO knowledge_base (id, title, source_type, url, content_body, tags)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (kb_id, title, source_type, url, content_body, tags)
-            )
-            conn.execute(
-                "INSERT INTO knowledge_fts (id, title, content_body, tags) VALUES (?, ?, ?, ?)",
-                (kb_id, title, content_body, tags)
-            )
-            conn.commit()
-        return kb_id
+        from modules.memory.manager import memory_manager
+        from modules.memory.models import KnowledgeMemory
+
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+        record = KnowledgeMemory(
+            entity_name=title,
+            category=source_type,
+            content=content_body,
+            tags=tag_list,
+            claims=[content_body[:200]]
+        )
+        return memory_manager.store_memory(record)
 
     def search(self, query: str, limit: int = 5) -> list[dict[str, Any]]:
-        with db_client.get_connection() as conn:
-            cursor = conn.execute(
-                """
-                SELECT k.* FROM knowledge_base k
-                JOIN knowledge_fts fts ON k.id = fts.id
-                WHERE knowledge_fts MATCH ?
-                ORDER BY rank LIMIT ?
-                """,
-                (query, limit)
-            )
-            return [dict(row) for row in cursor.fetchall()]
+        from modules.memory.manager import memory_manager
+        from modules.memory.models import MemoryNamespace
+
+        memories = memory_manager.search_memory(query, namespace=MemoryNamespace.KNOWLEDGE, limit=limit)
+        return [
+            {
+                "id": m.id,
+                "title": getattr(m, "entity_name", m.content[:50]),
+                "source_type": getattr(m, "category", "knowledge"),
+                "url": getattr(m, "url", ""),
+                "content_body": m.content,
+                "tags": ",".join(m.tags)
+            }
+            for m in memories
+        ]
 
 class LoggerRepository:
     def log(self, job_id: str | None, step_name: str, status: str, message: str, screenshot_path: str | None = None):
