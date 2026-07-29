@@ -7,11 +7,13 @@ from modules.workforce.workers.publisher_worker import PublisherWorker
 from modules.workforce.workers.research_worker import ResearchWorker
 from modules.workforce.workers.script_worker import ScriptWorker
 from modules.workforce.workers.strategist_worker import ContentStrategistWorker
+from modules.workforce.workers.writer_worker import WriterWorker
 
 __all__ = [
     "ResearchWorker",
     "MemoryWorker",
     "ContentStrategistWorker",
+    "WriterWorker",
     "ScriptWorker",
     "CarouselWorker",
     "CopywriterWorker",
