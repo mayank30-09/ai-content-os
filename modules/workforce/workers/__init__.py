@@ -2,6 +2,7 @@
 
 from modules.workforce.workers.carousel_worker import CarouselWorker
 from modules.workforce.workers.copywriter_worker import CopywriterWorker
+from modules.workforce.workers.fact_checker_worker import FactCheckerWorker
 from modules.workforce.workers.memory_worker import MemoryWorker
 from modules.workforce.workers.publisher_worker import PublisherWorker
 from modules.workforce.workers.research_worker import ResearchWorker
@@ -14,6 +15,7 @@ __all__ = [
     "MemoryWorker",
     "ContentStrategistWorker",
     "WriterWorker",
+    "FactCheckerWorker",
     "ScriptWorker",
     "CarouselWorker",
     "CopywriterWorker",
