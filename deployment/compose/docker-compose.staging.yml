@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  ai-content-os-staging:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile
+    container_name: ai_content_os_staging
+    environment:
+      - AI_CONTENT_OS_ENV=staging
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - staging_logs:/app/user_data/logs
+      - staging_db:/app/user_data/database
+    ports:
+      - "8001:8000"
+    restart: always
+
+volumes:
+  staging_logs:
+  staging_db:

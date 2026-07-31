@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  ai-content-os-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ai_content_os_dev
+    environment:
+      - AI_CONTENT_OS_ENV=development
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-dev_mock_key}
+      - LINKEDIN_PASSWORD=${LINKEDIN_PASSWORD:-dev_mock_pwd}
+    volumes:
+      - ../user_data:/app/user_data
+      - ../config:/app/config
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

@@ -1,0 +1,41 @@
+{
+  "config_version": "v1.0.0",
+  "env": {
+    "env": "development",
+    "debug": true,
+    "app_name": "AI Content OS (Dev)",
+    "app_version": "v0.8.1-dev"
+  },
+  "worker": {
+    "max_concurrent_workers": 8,
+    "task_timeout_sec": 60.0,
+    "enable_worker_metrics": true
+  },
+  "ai": {
+    "active_provider": "gemini"
+  },
+  "publisher": {
+    "linkedin_enabled": true,
+    "x_enabled": true,
+    "generic_cms_enabled": true
+  },
+  "db": {
+    "database_url": "sqlite:///user_data/database/ai_content_os_dev.db",
+    "sqlite_memory_db": "user_data/database/memory_system_dev.db",
+    "wal_mode": true
+  },
+  "logging": {
+    "log_level": "DEBUG",
+    "json_format": false,
+    "console_output": true,
+    "log_file_path": "user_data/logs/ai_content_os_dev.log"
+  },
+  "feature_flags": {
+    "enable_deep_research": true,
+    "enable_memory_store": true,
+    "enable_auto_fact_checking": true,
+    "enable_seo_optimization": true,
+    "enable_auto_checkpointing": true,
+    "enable_async_publishing": true
+  }
+}

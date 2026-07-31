@@ -1,0 +1,23 @@
+# Global Repository Owners
+* @mayank30-09
+
+# Core Subsystems Ownership
+/modules/workforce/     @mayank30-09
+/modules/workflow/      @mayank30-09
+/modules/observability/ @mayank30-09
+/modules/infrastructure/ @mayank30-09
+/modules/config/        @mayank30-09
+/modules/memory/        @mayank30-09
+/modules/research/      @mayank30-09
+
+# CI/CD Workflows & Infrastructure
+/.github/workflows/    @mayank30-09
+/docker/                @mayank30-09
+/scripts/               @mayank30-09
+/deployment/            @mayank30-09
+
+# Documentation & Governance
+/docs/                  @mayank30-09
+/portfolio/             @mayank30-09
+/LICENSE                @mayank30-09
+/SECURITY.md            @mayank30-09

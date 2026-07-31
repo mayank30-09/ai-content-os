@@ -1,0 +1,61 @@
+name: 🐛 Bug Report
+description: Create a report to help us reproduce and fix a bug in AI Content OS.
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please ensure you have searched existing issues before submitting.
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Provide step-by-step instructions or code to reproduce the issue.
+      placeholder: |
+        1. Run `WorkflowEngine.execute_workflow(...)`
+        2. Set worker to ...
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Diagnostic Logs & Traceback
+      description: Paste relevant Loguru logs or terminal output here.
+      render: shell
+    validations:
+      required: false
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Operating System
+      options:
+        - Linux (Ubuntu / Debian)
+        - macOS (Apple Silicon / Intel)
+        - Windows (Native / WSL2)
+        - Docker Container
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      placeholder: "e.g. 3.14.6"
+    validations:
+      required: true

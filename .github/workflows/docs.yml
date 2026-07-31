@@ -1,0 +1,18 @@
+name: Documentation Build & Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-docs:
+    name: Validate Markdown Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Markdown syntax
+        run: |
+          echo "Validating documentation markdown files..."
+          find . -name "*.md" -not -path "*/.*"

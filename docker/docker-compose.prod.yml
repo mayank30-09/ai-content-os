@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  ai-content-os-prod:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ai_content_os_prod
+    environment:
+      - AI_CONTENT_OS_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LINKEDIN_PASSWORD=${LINKEDIN_PASSWORD}
+      - X_API_KEY=${X_API_KEY}
+    volumes:
+      - prod_logs:/app/user_data/logs
+      - prod_db:/app/user_data/database
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 2048M
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+volumes:
+  prod_logs:
+  prod_db:
